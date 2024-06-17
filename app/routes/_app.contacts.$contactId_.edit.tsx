@@ -14,6 +14,7 @@ import {
   useLoaderData,
   useNavigate,
 } from "@remix-run/react";
+import type { ReactNode } from "react";
 import { z } from "zod";
 import { GeneralErrorBoundary } from "~/components/error-boundary";
 import { ErrorList } from "~/components/error-list";
@@ -113,9 +114,6 @@ export default function Component() {
     },
   });
 
-  const navigate = useNavigate();
-  const cancelEdit = () => navigate(-1);
-
   return (
     <>
       <h1 className="sr-only">Edit Contact</h1>
@@ -181,13 +179,9 @@ export default function Component() {
         </div>
         <div className="mt-6 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
           <div className="flex flex-row-reverse items-center justify-end gap-6 sm:col-span-2 sm:col-start-2">
-            <button
-              type="button"
-              onClick={cancelEdit}
-              className="text-sm/6 font-semibold text-gray-900"
-            >
+            <CancelButton className="text-sm/6 font-semibold text-gray-900">
               Cancel
-            </button>
+            </CancelButton>
             <button
               type="submit"
               className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
@@ -198,5 +192,21 @@ export default function Component() {
         </div>
       </Form>
     </>
+  );
+}
+
+function CancelButton({
+  className,
+  children,
+}: {
+  className?: string;
+  children?: ReactNode;
+}) {
+  const navigate = useNavigate();
+
+  return (
+    <button type="button" onClick={() => navigate(-1)} className={className}>
+      {children}
+    </button>
   );
 }
