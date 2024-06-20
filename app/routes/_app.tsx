@@ -1,5 +1,12 @@
-import { Outlet } from "@remix-run/react";
+import { ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/outline";
+import { Form, Outlet } from "@remix-run/react";
 import { Logo } from "~/components/logo";
+import { Button } from "~/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
 
 export default function Component() {
   return (
@@ -12,6 +19,9 @@ export default function Component() {
                 <Logo className="h-9 w-auto text-blue-600" />
               </div>
             </div>
+            <div className="mt-auto flex flex-col items-center gap-4 px-2 py-5">
+              <SignoutForm />
+            </div>
           </div>
         </div>
       </nav>
@@ -19,5 +29,28 @@ export default function Component() {
         <Outlet />
       </div>
     </div>
+  );
+}
+
+function SignoutForm() {
+  const buttonLabel = "Sign out";
+
+  return (
+    <Form method="post" action="/logout">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            type="submit"
+            variant="ghost"
+            size="icon"
+            className="rounded-lg"
+            aria-label={buttonLabel}
+          >
+            <ArrowRightStartOnRectangleIcon className="size-6" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="right">{buttonLabel}</TooltipContent>
+      </Tooltip>
+    </Form>
   );
 }

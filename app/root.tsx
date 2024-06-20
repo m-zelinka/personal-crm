@@ -1,4 +1,8 @@
-import type { LinksFunction } from "@remix-run/node";
+import {
+  json,
+  type LinksFunction,
+  type LoaderFunctionArgs,
+} from "@remix-run/node";
 import {
   Links,
   Meta,
@@ -7,8 +11,10 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 import type { ReactNode } from "react";
+import { TooltipProvider } from "./components/ui/tooltip";
 import fontStyleSheetUrl from "./styles/font.css?url";
 import tailwindStyleSheetUrl from "./styles/tailwind.css?url";
+import { getUser } from "./utils/auth.server";
 
 export const links: LinksFunction = () => {
   return [
@@ -21,6 +27,12 @@ export const links: LinksFunction = () => {
   ];
 };
 
+export async function loader({ request }: LoaderFunctionArgs) {
+  const user = await getUser(request);
+
+  return json({ user });
+}
+
 export function Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className="h-full antialiased">
@@ -31,7 +43,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <Links />
       </head>
       <body className="h-full">
-        {children}
+        <TooltipProvider delayDuration={0}>{children}</TooltipProvider>
         <ScrollRestoration />
         <Scripts />
       </body>

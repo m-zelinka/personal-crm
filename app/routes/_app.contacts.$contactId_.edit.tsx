@@ -21,6 +21,7 @@ import { ErrorList } from "~/components/forms";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { requireUserId } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 
 const schema = z.object({
@@ -43,10 +44,12 @@ const schema = z.object({
 });
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  return [{ title: data ? "Edit contact" : "Not Found" }];
+  return [{ title: data ? "Edit contact" : "No contact found" }];
 };
 
-export async function loader({ params }: LoaderFunctionArgs) {
+export async function loader({ request, params }: LoaderFunctionArgs) {
+  const userId = await requireUserId(request);
+
   invariant(params.contactId, "Missing contactId param");
   const contact = await prisma.contact.findUnique({
     select: {
@@ -54,7 +57,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
       last: true,
       avatar: true,
     },
-    where: { id: params.contactId },
+    where: { id: params.contactId, userId },
   });
   invariantResponse(
     contact,
@@ -66,10 +69,12 @@ export async function loader({ params }: LoaderFunctionArgs) {
 }
 
 export async function action({ params, request }: ActionFunctionArgs) {
+  const userId = await requireUserId(request);
+
   invariant(params.contactId, "Missing contactId param");
   const contact = await prisma.contact.findUnique({
     select: { id: true },
-    where: { id: params.contactId },
+    where: { id: params.contactId, userId },
   });
   invariantResponse(
     contact,
@@ -91,7 +96,7 @@ export async function action({ params, request }: ActionFunctionArgs) {
   await prisma.contact.update({
     select: { id: true },
     data: updates,
-    where: { id: params.contactId },
+    where: { id: params.contactId, userId },
   });
 
   return redirect(`/contacts/${params.contactId}`);
