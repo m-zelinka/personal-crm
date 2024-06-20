@@ -1,3 +1,5 @@
+"use client";
+
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { isRouteErrorResponse, useRouteError } from "@remix-run/react";
 
@@ -8,16 +10,14 @@ export function GeneralErrorBoundary() {
     : getErrorMessage(error);
 
   return (
-    <div>
-      <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-red-100">
-        <ExclamationTriangleIcon className="size-6 text-red-600" />
+    <div className="flex flex-col items-center gap-1 text-center">
+      <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-destructive-foreground">
+        <ExclamationTriangleIcon className="size-6 text-destructive" />
       </div>
-      <div className="mt-3 text-center">
-        <h3 className="text-base/6 font-semibold text-gray-900">
-          Oops! An error occurred…
-        </h3>
-        <p className="mt-2 text-sm text-gray-500">{errorMessage}</p>
-      </div>
+      <h3 className="mt-3 text-2xl font-bold tracking-tight">
+        Oops! An error occurred…
+      </h3>
+      <p className="text-sm text-muted-foreground">{errorMessage}</p>
     </div>
   );
 }

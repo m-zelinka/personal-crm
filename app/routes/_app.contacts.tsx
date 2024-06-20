@@ -3,7 +3,7 @@ import {
   MagnifyingGlassIcon,
   PlusIcon,
   StarIcon,
-} from "@heroicons/react/20/solid";
+} from "@heroicons/react/16/solid";
 import type { Contact } from "@prisma/client";
 import {
   json,
@@ -21,14 +21,17 @@ import {
   useSearchParams,
   useSubmit,
 } from "@remix-run/react";
-import clsx from "clsx";
 import { matchSorter } from "match-sorter";
 import { useEffect, useRef, type ReactNode } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import sortBy from "sort-by";
 import { useSpinDelay } from "spin-delay";
 import { LoadingOverlay } from "~/components/loading-overlay";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { ScrollArea } from "~/components/ui/scroll-area";
 import { prisma } from "~/utils/db.server";
+import { cx } from "~/utils/misc";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Contacts" }];
@@ -65,52 +68,46 @@ export default function Component() {
 
   return (
     <>
-      <main className="py-6 pl-96">
+      <main className="pl-96">
         <LoadingOverlay>
-          <div className="mx-auto max-w-4xl px-8">
+          <div className="mx-auto max-w-4xl p-6">
             <Outlet />
           </div>
         </LoadingOverlay>
       </main>
-      <aside className="fixed inset-y-0 flex w-96 flex-col overflow-y-auto border-r border-gray-200">
-        <div className="sticky top-0 z-40 flex w-full gap-4 bg-white/90 px-8 py-4 ring-1 ring-gray-200 backdrop-blur-sm">
+      <aside className="fixed inset-y-0 flex w-96 flex-col border-r">
+        <div className="sticky top-0 z-40 flex w-full gap-4 border-b border-border bg-background/90 p-4 backdrop-blur-sm">
           <search role="search" className="flex-1">
             <Form>
               <SearchBar />
             </Form>
           </search>
           <Form method="post">
-            <button
-              type="submit"
-              className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-              aria-label="New contact"
-            >
-              <PlusIcon className="-ml-0.5 size-5" />
+            <Button type="submit" aria-label="New contact">
+              <PlusIcon className="mr-1.5 size-4" />
               New
-            </button>
+            </Button>
           </Form>
         </div>
-        <nav className="flex-1 px-8 py-4">
+        <ScrollArea className="flex-1 p-4">
           {contacts.length ? (
-            <ul className="-mx-2">
+            <ul className="grid gap-2">
               {contacts.map((contact) => (
                 <li key={contact.id}>
                   <NavLink
                     to={contact.id}
                     prefetch="intent"
                     className={({ isActive, isPending }) =>
-                      clsx(
-                        "group flex items-center gap-3 rounded-md p-2 text-sm",
+                      cx(
+                        "group flex items-center gap-2 rounded-md border p-2 text-sm transition-all",
                         isActive
-                          ? "bg-blue-600 text-white"
+                          ? "bg-muted"
                           : isPending
-                            ? "bg-gray-100 text-blue-600"
+                            ? "bg-muted text-muted-foreground"
                             : contact.first || contact.last
-                              ? "text-gray-700"
-                              : "text-gray-500",
-                        !isActive && !isPending
-                          ? "hover:bg-gray-100 hover:text-gray-900"
-                          : "",
+                              ? ""
+                              : "text-muted-foreground",
+                        !isActive && !isPending ? "hover:bg-muted" : "",
                       )
                     }
                   >
@@ -127,11 +124,11 @@ export default function Component() {
                         </span>
                         <Favorite contact={contact}>
                           <StarIcon
-                            className={clsx(
-                              "size-5 flex-none",
+                            className={cx(
+                              "size-4 flex-none",
                               isActive
                                 ? ""
-                                : "text-yellow-400 group-hover:text-yellow-500",
+                                : "text-muted-foreground group-hover:text-foreground",
                             )}
                           />
                         </Favorite>
@@ -142,9 +139,9 @@ export default function Component() {
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-gray-500">No contacts</p>
+            <p className="text-sm text-muted-foreground">No contacts</p>
           )}
-        </nav>
+        </ScrollArea>
       </aside>
     </>
   );
@@ -188,16 +185,16 @@ function SearchBar() {
   return (
     <div className="relative">
       <div
-        className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
+        className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2.5"
         aria-hidden
       >
         {showSpinner ? (
-          <ArrowPathIcon className="size-5 animate-spin text-gray-400" />
+          <ArrowPathIcon className="size-4 animate-spin text-muted-foreground" />
         ) : (
-          <MagnifyingGlassIcon className="size-5 text-gray-400" />
+          <MagnifyingGlassIcon className="size-4 text-muted-foreground" />
         )}
       </div>
-      <input
+      <Input
         ref={inputRef}
         type="search"
         name="q"
@@ -209,16 +206,16 @@ function SearchBar() {
             replace: !isFirstSearch,
           });
         }}
-        className="block w-full rounded-md border-0 py-1.5 pl-10 pr-8 text-sm/6 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600"
+        className="pl-8"
         placeholder="Search"
         aria-label="Search contacts"
         aria-keyshortcuts={keyShortcut}
       />
       <div
-        className="absolute inset-y-0 right-0 flex py-1.5 pr-1.5"
+        className="pointer-events-none absolute inset-y-0 right-0 flex py-1.5 pr-1.5"
         aria-hidden
       >
-        <kbd className="inline-flex items-center rounded border border-gray-200 px-1 font-sans text-xs text-gray-400">
+        <kbd className="inline-flex items-center rounded border bg-muted px-1 font-mono text-[10px] text-muted-foreground">
           {keyShortcut}
         </kbd>
       </div>

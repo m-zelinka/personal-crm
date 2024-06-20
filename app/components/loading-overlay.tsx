@@ -1,3 +1,5 @@
+"use client";
+
 import { useNavigation } from "@remix-run/react";
 import type { ReactNode } from "react";
 import { useSpinDelay } from "spin-delay";

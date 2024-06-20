@@ -17,7 +17,10 @@ import {
 import type { ReactNode } from "react";
 import { z } from "zod";
 import { GeneralErrorBoundary } from "~/components/error-boundary";
-import { ErrorList } from "~/components/error-list";
+import { ErrorList } from "~/components/forms";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import { prisma } from "~/utils/db.server";
 
 const schema = z.object({
@@ -39,8 +42,8 @@ const schema = z.object({
     .transform((arg) => arg || null),
 });
 
-export const meta: MetaFunction = () => {
-  return [{ title: "Edit contact" }];
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return [{ title: data ? "Edit contact" : "Not Found" }];
 };
 
 export async function loader({ params }: LoaderFunctionArgs) {
@@ -75,7 +78,6 @@ export async function action({ params, request }: ActionFunctionArgs) {
   );
 
   const formData = await request.formData();
-
   const submission = parseWithZod(formData, { schema });
 
   if (submission.status !== "success") {
@@ -109,85 +111,58 @@ export default function Component() {
     lastResult: actionData?.result,
     shouldValidate: "onBlur",
     shouldRevalidate: "onInput",
-    onValidate: ({ formData }) => {
-      return parseWithZod(formData, { schema });
-    },
+    onValidate: ({ formData }) => parseWithZod(formData, { schema }),
   });
 
   return (
     <>
       <h1 className="sr-only">Edit Contact</h1>
       <Form method="post" {...getFormProps(form)}>
-        <div className="space-y-6">
-          <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
-            <label
-              htmlFor={fields.avatar.id}
-              className="block text-sm/6 font-medium text-gray-900 sm:pt-1.5"
-            >
+        <div className="grid gap-4">
+          <div className="grid grid-cols-3 items-start gap-4">
+            <Label htmlFor={fields.avatar.id} className="pt-3">
               Avatar URL
-            </label>
-            <div className="max-sm:mt-2 sm:col-span-2">
-              <input
-                className="block w-full rounded-md border-0 py-1.5 text-sm/6 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 aria-[invalid]:text-red-900 aria-[invalid]:ring-red-300 aria-[invalid]:placeholder:text-red-300 aria-[invalid]:focus:ring-red-500"
-                {...getInputProps(fields.avatar, { type: "url" })}
+            </Label>
+            <div className="col-span-2 grid gap-2">
+              <Input {...getInputProps(fields.avatar, { type: "url" })} />
+              <ErrorList
+                id={fields.avatar.errorId}
+                errors={fields.avatar.errors}
               />
             </div>
-            <ErrorList
-              id={fields.avatar.errorId}
-              errors={fields.avatar.errors}
-              className="mt-2"
-            />
           </div>
-          <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
-            <label
-              htmlFor={fields.first.id}
-              className="block text-sm/6 font-medium text-gray-900 sm:pt-1.5"
-            >
+          <div className="grid grid-cols-3 items-start gap-4">
+            <Label htmlFor={fields.first.id} className="pt-3">
               First name
-            </label>
-            <div className="max-sm:mt-2 sm:col-span-2">
-              <input
-                className="block w-full rounded-md border-0 py-1.5 text-sm/6 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 aria-[invalid]:text-red-900 aria-[invalid]:ring-red-300 aria-[invalid]:placeholder:text-red-300 aria-[invalid]:focus:ring-red-500 sm:max-w-xs"
+            </Label>
+            <div className="col-span-2 grid gap-2">
+              <Input
+                className="max-w-xs"
                 {...getInputProps(fields.first, { type: "text" })}
               />
-            </div>
-            <ErrorList
-              id={fields.first.errorId}
-              errors={fields.first.errors}
-              className="mt-2"
-            />
-          </div>
-          <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
-            <label
-              htmlFor={fields.last.id}
-              className="block text-sm/6 font-medium text-gray-900 sm:pt-1.5"
-            >
-              Last name
-            </label>
-            <div className="max-sm:mt-2 sm:col-span-2">
-              <input
-                className="block w-full rounded-md border-0 py-1.5 text-sm/6 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 aria-[invalid]:text-red-900 aria-[invalid]:ring-red-300 aria-[invalid]:placeholder:text-red-300 aria-[invalid]:focus:ring-red-500 sm:max-w-xs"
-                {...getInputProps(fields.last, { type: "text" })}
+              <ErrorList
+                id={fields.first.errorId}
+                errors={fields.first.errors}
               />
             </div>
-            <ErrorList
-              id={fields.last.errorId}
-              errors={fields.last.errors}
-              className="mt-2"
-            />
+          </div>
+          <div className="grid grid-cols-3 items-start gap-4">
+            <Label htmlFor={fields.last.id} className="pt-3">
+              Last name
+            </Label>
+            <div className="col-span-2 grid gap-2">
+              <Input
+                className="max-w-xs"
+                {...getInputProps(fields.last, { type: "text" })}
+              />
+              <ErrorList id={fields.last.errorId} errors={fields.last.errors} />
+            </div>
           </div>
         </div>
-        <div className="mt-6 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
-          <div className="flex flex-row-reverse items-center justify-end gap-6 sm:col-span-2 sm:col-start-2">
-            <CancelButton className="text-sm/6 font-semibold text-gray-900">
-              Cancel
-            </CancelButton>
-            <button
-              type="submit"
-              className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-            >
-              Save
-            </button>
+        <div className="mt-4 grid grid-cols-3 items-start gap-3">
+          <div className="col-span-2 col-start-2 flex flex-row-reverse items-center justify-end gap-3">
+            <CancelButton>Cancel</CancelButton>
+            <Button type="submit">Save</Button>
           </div>
         </div>
       </Form>
@@ -205,8 +180,13 @@ function CancelButton({
   const navigate = useNavigate();
 
   return (
-    <button type="button" onClick={() => navigate(-1)} className={className}>
+    <Button
+      type="button"
+      variant="ghost"
+      onClick={() => navigate(-1)}
+      className={className}
+    >
       {children}
-    </button>
+    </Button>
   );
 }

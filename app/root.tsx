@@ -1,3 +1,4 @@
+import type { LinksFunction } from "@remix-run/node";
 import {
   Links,
   Meta,
@@ -6,7 +7,19 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 import type { ReactNode } from "react";
-import "./tailwind.css";
+import fontStyleSheetUrl from "./styles/font.css?url";
+import tailwindStyleSheetUrl from "./styles/tailwind.css?url";
+
+export const links: LinksFunction = () => {
+  return [
+    // Preload CSS as a resource to avoid render blocking
+    { rel: "preload", href: fontStyleSheetUrl, as: "style" },
+    { rel: "preload", href: tailwindStyleSheetUrl, as: "style" },
+    // Matching the css preloads above to avoid css as render blocking resource
+    { rel: "stylesheet", href: fontStyleSheetUrl, as: "style" },
+    { rel: "stylesheet", href: tailwindStyleSheetUrl, as: "style" },
+  ];
+};
 
 export function Layout({ children }: { children: ReactNode }) {
   return (

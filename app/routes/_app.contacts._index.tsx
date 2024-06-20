@@ -1,12 +1,10 @@
 import { PlusIcon } from "@heroicons/react/20/solid";
-import { CursorArrowRaysIcon } from "@heroicons/react/24/outline";
 import { Form } from "@remix-run/react";
 import { Empty } from "~/components/empty";
 
 export default function Component() {
   return (
     <Empty
-      icon={<CursorArrowRaysIcon />}
       title="No contact selected"
       description="Select a contact on the left, or create a new contact."
     >

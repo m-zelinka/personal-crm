@@ -1,5 +1,5 @@
 import { invariant, invariantResponse } from "@epic-web/invariant";
-import { PencilIcon, StarIcon, TrashIcon } from "@heroicons/react/20/solid";
+import { PencilIcon, StarIcon, TrashIcon } from "@heroicons/react/16/solid";
 import type { Contact } from "@prisma/client";
 import {
   json,
@@ -9,9 +9,12 @@ import {
   type MetaFunction,
 } from "@remix-run/node";
 import { Form, useFetcher, useLoaderData } from "@remix-run/react";
-import clsx from "clsx";
 import { GeneralErrorBoundary } from "~/components/error-boundary";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Button } from "~/components/ui/button";
+import { Toggle } from "~/components/ui/toggle";
 import { prisma } from "~/utils/db.server";
+import { cx } from "~/utils/misc";
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
@@ -92,33 +95,31 @@ export default function Component() {
     <>
       <div className="flex items-end">
         <div className="flex flex-none">
-          {contact.avatar ? (
-            <img
-              key={contact.avatar}
-              src={contact.avatar}
-              alt=""
-              className="size-32 rounded-full"
-            />
-          ) : (
-            <span
-              className="inline-block size-32 overflow-hidden rounded-full bg-gray-100"
-              aria-hidden
-            >
-              <svg
-                className="h-full w-full text-gray-300"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-            </span>
-          )}
+          <Avatar
+            key={contact.avatar}
+            // src={contact.avatar}
+            // alt=""
+            className="size-32"
+          >
+            <AvatarImage src={contact.avatar ?? undefined} alt="" />
+            <AvatarFallback>
+              <span className="bg-muted" aria-hidden>
+                <svg
+                  className="h-full w-full text-muted-foreground"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              </span>
+            </AvatarFallback>
+          </Avatar>
         </div>
         <div className="ml-5 flex w-full min-w-0 items-baseline gap-3 pb-1">
           <h1
-            className={clsx(
-              "truncate text-2xl font-bold",
-              contact.first || contact.last ? "text-gray-900" : "text-gray-500",
+            className={cx(
+              "text-2xl font-semibold leading-none tracking-tight",
+              contact.first || contact.last ? "" : "text-muted-foreground",
             )}
           >
             {contact.first || contact.last ? (
@@ -133,13 +134,10 @@ export default function Component() {
         </div>
         <div className="ml-6 flex gap-4 pb-1">
           <Form action="edit">
-            <button
-              type="submit"
-              className="inline-flex justify-center gap-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-            >
-              <PencilIcon className="-ml-0.5 size-5 text-gray-400" />
+            <Button type="submit" variant="outline">
+              <PencilIcon className="mr-1.5 size-4" />
               Edit
-            </button>
+            </Button>
           </Form>
           <Form
             method="post"
@@ -154,13 +152,10 @@ export default function Component() {
             }}
           >
             <input type="hidden" name="intent" value="delete" />
-            <button
-              type="submit"
-              className="inline-flex justify-center gap-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-            >
-              <TrashIcon className="-ml-0.5 size-5 text-gray-400" />
+            <Button type="submit" variant="outline">
+              <TrashIcon className="mr-1.5 size-4" />
               Delete
-            </button>
+            </Button>
           </Form>
         </div>
       </div>
@@ -182,21 +177,14 @@ function Favorite({ contact }: { contact: Pick<Contact, "id" | "favorite"> }) {
         name="favorite"
         value={favorite ? "false" : "true"}
       />
-      <button
+      <Toggle
         type="submit"
-        className={clsx(
-          "relative inline-flex size-8 items-center justify-center rounded-full bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600",
-          favorite
-            ? "text-yellow-400 hover:text-yellow-500"
-            : "text-gray-400 hover:text-gray-500",
-        )}
         aria-label={
           contact.favorite ? "Remove from favorites" : "Add to favorites"
         }
       >
-        <span className="absolute -inset-1.5" />
-        <StarIcon className="size-5" />
-      </button>
+        <StarIcon className="size-4" />
+      </Toggle>
     </fetcher.Form>
   );
 }
