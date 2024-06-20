@@ -1,36 +1,43 @@
+import { invariant, invariantResponse } from "@epic-web/invariant";
 import { PencilIcon } from "@heroicons/react/16/solid";
-import { Form } from "@remix-run/react";
+import type { LoaderFunctionArgs } from "@remix-run/node";
+import { Form, json, useLoaderData } from "@remix-run/react";
 import { format } from "date-fns";
 import { Empty } from "~/components/empty";
 import { Button } from "~/components/ui/button";
+import { requireUserId } from "~/utils/auth.server";
+import { prisma } from "~/utils/db.server";
 
-const data = {
-  // contact: {
-  //   email: "mzelinka@gmail.com",
-  //   phone: null,
-  //   linkedin: "m-zelinka",
-  //   twitter: "m_zelinka",
-  //   website: "marekzelinka.dev",
-  //   location: "Presov, Slovakia, EU",
-  //   company: "Vercel",
-  //   birthday: null,
-  //   bio: "Web Developer",
-  // },
-  contact: {
-    email: null,
-    phone: null,
-    linkedin: null,
-    twitter: null,
-    website: null,
-    location: null,
-    company: null,
-    birthday: null,
-    bio: null,
-  },
-};
+export async function loader({ request, params }: LoaderFunctionArgs) {
+  const userId = await requireUserId(request);
+
+  invariant(params.contactId, "Missing contactId param");
+  const contact = await prisma.contact.findUnique({
+    select: {
+      email: true,
+      phone: true,
+      linkedin: true,
+      twitter: true,
+      website: true,
+      location: true,
+      company: true,
+      birthday: true,
+      bio: true,
+    },
+    where: { id: params.contactId, userId },
+  });
+  invariantResponse(
+    contact,
+    `No contact with the id "${params.contactId}" exists.`,
+    { status: 404 },
+  );
+
+  return json({ contact });
+}
 
 export default function Component() {
-  const { contact } = data;
+  const { contact } = useLoaderData<typeof loader>();
+
   const fields = [
     { label: "Email address", value: contact.email },
     { label: "Phone number", value: contact.phone },
@@ -57,19 +64,17 @@ export default function Component() {
 
   if (!fieldsToShow.length) {
     return (
-      <div className="py-10">
-        <Empty
-          title="No details"
-          description="You haven’t added any details yet."
-        >
-          <Form action="edit">
-            <Button type="submit" variant="secondary">
-              <PencilIcon className="mr-1.5 size-4" />
-              Edit contact details
-            </Button>
-          </Form>
-        </Empty>
-      </div>
+      <Empty
+        title="No details"
+        description="You haven’t added any details yet."
+      >
+        <Form action="edit">
+          <Button type="submit" variant="secondary">
+            <PencilIcon className="mr-1.5 size-4" />
+            Edit contact details
+          </Button>
+        </Form>
+      </Empty>
     );
   }
 
