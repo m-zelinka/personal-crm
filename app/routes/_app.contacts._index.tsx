@@ -1,6 +1,7 @@
-import { PlusIcon } from "@heroicons/react/20/solid";
+import { PlusIcon } from "@heroicons/react/16/solid";
 import { Form } from "@remix-run/react";
 import { Empty } from "~/components/empty";
+import { Button } from "~/components/ui/button";
 
 export default function Component() {
   return (
@@ -9,13 +10,10 @@ export default function Component() {
       description="Select a contact on the left, or create a new contact."
     >
       <Form method="post" action="/contacts">
-        <button
-          type="submit"
-          className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-        >
-          <PlusIcon className="-ml-0.5 size-5" />
+        <Button type="submit" variant="secondary">
+          <PlusIcon className="mr-1.5 size-4" />
           New contact
-        </button>
+        </Button>
       </Form>
     </Empty>
   );
