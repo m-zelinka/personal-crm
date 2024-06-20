@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { cx } from "~/utils/misc";
 
 export type ListOfErrors = Array<string | null | undefined> | null | undefined;
@@ -27,5 +28,21 @@ export function ErrorList({
         </li>
       ))}
     </ul>
+  );
+}
+
+export function Description({
+  id,
+  className,
+  children,
+}: {
+  id: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <p id={id} className={cx("text-sm text-muted-foreground", className)}>
+      {children}
+    </p>
   );
 }
