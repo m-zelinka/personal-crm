@@ -103,11 +103,6 @@ export function ErrorBoundary() {
 export default function Component() {
   const { contact } = useLoaderData<typeof loader>();
 
-  const tabs: Array<{ name: string; to: NavLinkProps["to"] }> = [
-    { name: "Profile", to: "." },
-    { name: "Notes", to: "notes" },
-  ];
-
   return (
     <>
       <div className="flex items-end">
@@ -172,30 +167,7 @@ export default function Component() {
         </div>
       </div>
       <div className="mt-8">
-        <nav
-          className="inline-flex h-9 w-full items-center justify-start rounded-none border-b bg-transparent p-0 text-muted-foreground"
-          aria-label="Tabs"
-        >
-          {tabs.map((tab) => (
-            <NavLink
-              key={tab.name}
-              to={tab.to}
-              end
-              prefetch="intent"
-              preventScrollReset
-              className={({ isActive }) =>
-                cx(
-                  "inline-flex h-9 items-center justify-center whitespace-nowrap border-b-2 px-4 py-1 pb-3 pt-2 text-sm font-semibold text-muted-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-                  isActive
-                    ? "border-b-primary bg-background text-foreground"
-                    : "border-b-transparent",
-                )
-              }
-            >
-              {tab.name}
-            </NavLink>
-          ))}
-        </nav>
+        <TabNav />
       </div>
       <div className="mt-4">
         <Outlet />
@@ -227,5 +199,39 @@ function Favorite({ contact }: { contact: Pick<Contact, "id" | "favorite"> }) {
         <StarIcon className="size-4" />
       </Toggle>
     </fetcher.Form>
+  );
+}
+
+function TabNav() {
+  const tabs: Array<{ name: string; to: NavLinkProps["to"] }> = [
+    { name: "Profile", to: "." },
+    { name: "Notes", to: "notes" },
+  ];
+
+  return (
+    <nav
+      className="flex h-9 w-full items-center border-b text-muted-foreground"
+      aria-label="Tabs"
+    >
+      {tabs.map((tab) => (
+        <NavLink
+          key={tab.name}
+          to={tab.to}
+          end
+          prefetch="intent"
+          preventScrollReset
+          className={({ isActive }) =>
+            cx(
+              "inline-flex h-9 items-center justify-center whitespace-nowrap border-b-2 px-4 pb-3 pt-2 text-sm font-semibold text-muted-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+              isActive
+                ? "border-b-primary text-foreground"
+                : "border-b-transparent",
+            )
+          }
+        >
+          {tab.name}
+        </NavLink>
+      ))}
+    </nav>
   );
 }
