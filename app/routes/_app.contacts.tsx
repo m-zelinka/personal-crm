@@ -19,6 +19,7 @@ import {
   useFetcher,
   useLoaderData,
   useNavigation,
+  useResolvedPath,
   useSearchParams,
   useSubmit,
 } from "@remix-run/react";
@@ -27,7 +28,6 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import sortBy from "sort-by";
 import { useSpinDelay } from "spin-delay";
-import { LoadingOverlay } from "~/components/loading-overlay";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { ScrollArea } from "~/components/ui/scroll-area";
@@ -76,11 +76,11 @@ export default function Component() {
   return (
     <>
       <main className="pl-96">
-        <LoadingOverlay>
+        <DetailLoadingOverlay>
           <div className="max-w-3xl p-6">
             <Outlet />
           </div>
-        </LoadingOverlay>
+        </DetailLoadingOverlay>
       </main>
       <aside className="fixed inset-y-0 flex w-96 flex-col border-r">
         <div className="sticky top-0 z-40 flex w-full gap-4 border-b border-border bg-background/90 p-4 backdrop-blur-sm">
@@ -154,12 +154,24 @@ export default function Component() {
   );
 }
 
+function DetailLoadingOverlay({ children }: { children?: ReactNode }) {
+  const navigation = useNavigation();
+  const loading = navigation.state === "loading";
+  const searchingContacts = useIsSearchingContacts();
+  const showOverlay = useSpinDelay(loading && !searchingContacts);
+
+  if (showOverlay) {
+    return <div className="opacity-50 transition-opacity">{children}</div>;
+  }
+
+  return children;
+}
+
 function SearchBar() {
   const [searchParams] = useSearchParams();
   const q = searchParams.get("q");
 
-  const navigation = useNavigation();
-  const searching = new URLSearchParams(navigation.location?.search).has("q");
+  const searching = useIsSearchingContacts();
   const showSpinner = useSpinDelay(searching);
 
   // Used to submit the form for every keystroke
@@ -213,7 +225,7 @@ function SearchBar() {
             replace: !isFirstSearch,
           });
         }}
-        className="pl-8"
+        className="pl-8 pr-10"
         placeholder="Search"
         aria-label="Search contacts"
         aria-keyshortcuts={keyShortcut}
@@ -228,6 +240,16 @@ function SearchBar() {
       </div>
     </div>
   );
+}
+
+function useIsSearchingContacts() {
+  const navigation = useNavigation();
+  const contactsRoute = useResolvedPath("/contacts");
+  const searching =
+    navigation.location?.pathname === contactsRoute.pathname &&
+    new URLSearchParams(navigation.location?.search).has("q");
+
+  return searching;
 }
 
 function Favorite({
