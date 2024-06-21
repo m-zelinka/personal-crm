@@ -1,17 +1,17 @@
-import { invariant, invariantResponse } from "@epic-web/invariant";
-import { PencilIcon } from "@heroicons/react/16/solid";
-import type { LoaderFunctionArgs } from "@remix-run/node";
-import { Form, json, useLoaderData } from "@remix-run/react";
-import { format } from "date-fns";
-import { Empty } from "~/components/empty";
-import { Button } from "~/components/ui/button";
-import { requireUserId } from "~/utils/auth.server";
-import { prisma } from "~/utils/db.server";
+import { invariant, invariantResponse } from '@epic-web/invariant'
+import { PencilIcon } from '@heroicons/react/16/solid'
+import type { LoaderFunctionArgs } from '@remix-run/node'
+import { Form, json, useLoaderData } from '@remix-run/react'
+import { format } from 'date-fns'
+import { Empty } from '~/components/empty'
+import { Button } from '~/components/ui/button'
+import { requireUserId } from '~/utils/auth.server'
+import { prisma } from '~/utils/db.server'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
-  const userId = await requireUserId(request);
+  const userId = await requireUserId(request)
 
-  invariant(params.contactId, "Missing contactId param");
+  invariant(params.contactId, 'Missing contactId param')
   const contact = await prisma.contact.findUnique({
     select: {
       email: true,
@@ -25,42 +25,42 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       bio: true,
     },
     where: { id: params.contactId, userId },
-  });
+  })
   invariantResponse(
     contact,
     `No contact with the id "${params.contactId}" exists.`,
     { status: 404 },
-  );
+  )
 
-  return json({ contact });
+  return json({ contact })
 }
 
 export default function Component() {
-  const { contact } = useLoaderData<typeof loader>();
+  const { contact } = useLoaderData<typeof loader>()
 
   const fields = [
-    { label: "Email address", value: contact.email },
-    { label: "Phone number", value: contact.phone },
+    { label: 'Email address', value: contact.email },
+    { label: 'Phone number', value: contact.phone },
     {
-      label: "LinkedIn",
+      label: 'LinkedIn',
       value: contact.linkedin
         ? `https://www.linkedin.com/in/${contact.linkedin}`
         : null,
     },
     {
-      label: "Twitter",
+      label: 'Twitter',
       value: contact.twitter ? `https://twitter.com/${contact.twitter}` : null,
     },
-    { label: "Website", value: contact.website },
-    { label: "Location", value: contact.location },
-    { label: "Company", value: contact.company },
+    { label: 'Website', value: contact.website },
+    { label: 'Location', value: contact.location },
+    { label: 'Company', value: contact.company },
     {
-      label: "Birthday",
-      value: contact.birthday ? format(contact.birthday, "PP") : null,
+      label: 'Birthday',
+      value: contact.birthday ? format(contact.birthday, 'PP') : null,
     },
-    { label: "Bio", value: contact.bio },
-  ];
-  const fieldsToShow = fields.filter((field) => field.value);
+    { label: 'Bio', value: contact.bio },
+  ]
+  const fieldsToShow = fields.filter((field) => field.value)
 
   if (!fieldsToShow.length) {
     return (
@@ -75,7 +75,7 @@ export default function Component() {
           </Button>
         </Form>
       </Empty>
-    );
+    )
   }
 
   return (
@@ -89,5 +89,5 @@ export default function Component() {
         ))}
       </dl>
     </div>
-  );
+  )
 }

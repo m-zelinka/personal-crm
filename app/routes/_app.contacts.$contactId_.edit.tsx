@@ -3,34 +3,34 @@ import {
   getInputProps,
   getTextareaProps,
   useForm,
-} from "@conform-to/react";
-import { getZodConstraint, parseWithZod } from "@conform-to/zod";
-import { invariant, invariantResponse } from "@epic-web/invariant";
+} from '@conform-to/react'
+import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+import { invariant, invariantResponse } from '@epic-web/invariant'
 import {
   json,
   redirect,
   type ActionFunctionArgs,
   type LoaderFunctionArgs,
   type MetaFunction,
-} from "@remix-run/node";
+} from '@remix-run/node'
 import {
   Form,
   useActionData,
   useLoaderData,
   useNavigate,
-} from "@remix-run/react";
-import { format } from "date-fns";
-import type { ReactNode } from "react";
-import { z } from "zod";
-import { GeneralErrorBoundary } from "~/components/error-boundary";
-import { Description, ErrorList } from "~/components/forms";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import { Separator } from "~/components/ui/separator";
-import { Textarea } from "~/components/ui/textarea";
-import { requireUserId } from "~/utils/auth.server";
-import { prisma } from "~/utils/db.server";
+} from '@remix-run/react'
+import { format } from 'date-fns'
+import type { ReactNode } from 'react'
+import { z } from 'zod'
+import { GeneralErrorBoundary } from '~/components/error-boundary'
+import { Description, ErrorList } from '~/components/forms'
+import { Button } from '~/components/ui/button'
+import { Input } from '~/components/ui/input'
+import { Label } from '~/components/ui/label'
+import { Separator } from '~/components/ui/separator'
+import { Textarea } from '~/components/ui/textarea'
+import { requireUserId } from '~/utils/auth.server'
+import { prisma } from '~/utils/db.server'
 
 const schema = z.object({
   first: z
@@ -46,13 +46,13 @@ const schema = z.object({
   avatar: z
     .string()
     .trim()
-    .url("Avatar URL is invalid")
+    .url('Avatar URL is invalid')
     .optional()
     .transform((arg) => arg || null),
   email: z
     .string()
     .trim()
-    .email("Email is invalid")
+    .email('Email is invalid')
     .optional()
     .transform((arg) => arg || null),
   phone: z
@@ -73,7 +73,7 @@ const schema = z.object({
   website: z
     .string()
     .trim()
-    .url("Website URL is invalid")
+    .url('Website URL is invalid')
     .optional()
     .transform((arg) => arg || null),
   location: z
@@ -87,25 +87,25 @@ const schema = z.object({
     .optional()
     .transform((arg) => arg || null),
   birthday: z.coerce
-    .date({ invalid_type_error: "Birthday is invalid" })
+    .date({ invalid_type_error: 'Birthday is invalid' })
     .optional()
     .transform((arg) => arg || null),
   bio: z
     .string()
     .trim()
-    .max(255, "Bio is too long")
+    .max(255, 'Bio is too long')
     .optional()
     .transform((arg) => arg || null),
-});
+})
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  return [{ title: data ? "Edit contact" : "No contact found" }];
-};
+  return [{ title: data ? 'Edit contact' : 'No contact found' }]
+}
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
-  const userId = await requireUserId(request);
+  const userId = await requireUserId(request)
 
-  invariant(params.contactId, "Missing contactId param");
+  invariant(params.contactId, 'Missing contactId param')
   const contact = await prisma.contact.findUnique({
     select: {
       first: true,
@@ -122,71 +122,71 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       bio: true,
     },
     where: { id: params.contactId, userId },
-  });
+  })
   invariantResponse(
     contact,
     `No contact with the id "${params.contactId}" exists.`,
     { status: 404 },
-  );
+  )
 
-  return json({ contact });
+  return json({ contact })
 }
 
 export async function action({ params, request }: ActionFunctionArgs) {
-  const userId = await requireUserId(request);
+  const userId = await requireUserId(request)
 
-  invariant(params.contactId, "Missing contactId param");
+  invariant(params.contactId, 'Missing contactId param')
   const contact = await prisma.contact.findUnique({
     select: { id: true },
     where: { id: params.contactId, userId },
-  });
+  })
   invariantResponse(
     contact,
     `No contact with the id "${params.contactId}" exists.`,
     { status: 404 },
-  );
+  )
 
-  const formData = await request.formData();
-  const submission = parseWithZod(formData, { schema });
+  const formData = await request.formData()
+  const submission = parseWithZod(formData, { schema })
 
-  if (submission.status !== "success") {
+  if (submission.status !== 'success') {
     return json(
       { result: submission.reply() },
-      { status: submission.status === "error" ? 400 : 200 },
-    );
+      { status: submission.status === 'error' ? 400 : 200 },
+    )
   }
 
-  const updates = submission.value;
+  const updates = submission.value
   await prisma.contact.update({
     select: { id: true },
     data: updates,
     where: { id: params.contactId, userId },
-  });
+  })
 
-  return redirect(`/contacts/${params.contactId}`);
+  return redirect(`/contacts/${params.contactId}`)
 }
 
 export function ErrorBoundary() {
-  return <GeneralErrorBoundary />;
+  return <GeneralErrorBoundary />
 }
 
 export default function Component() {
-  const { contact } = useLoaderData<typeof loader>();
+  const { contact } = useLoaderData<typeof loader>()
 
-  const actionData = useActionData<typeof action>();
+  const actionData = useActionData<typeof action>()
   const [form, fields] = useForm({
     defaultValue: {
       ...contact,
       birthday: contact.birthday
-        ? format(contact.birthday, "yyyy-MM-dd")
+        ? format(contact.birthday, 'yyyy-MM-dd')
         : null,
     },
     constraint: getZodConstraint(schema),
     lastResult: actionData?.result,
-    shouldValidate: "onBlur",
-    shouldRevalidate: "onInput",
+    shouldValidate: 'onBlur',
+    shouldRevalidate: 'onInput',
     onValidate: ({ formData }) => parseWithZod(formData, { schema }),
-  });
+  })
 
   return (
     <>
@@ -198,7 +198,7 @@ export default function Component() {
               Avatar URL
             </Label>
             <div className="col-span-2 grid gap-2">
-              <Input {...getInputProps(fields.avatar, { type: "url" })} />
+              <Input {...getInputProps(fields.avatar, { type: 'url' })} />
               <ErrorList
                 id={fields.avatar.errorId}
                 errors={fields.avatar.errors}
@@ -212,7 +212,7 @@ export default function Component() {
             <div className="col-span-2 grid gap-2">
               <Input
                 className="max-w-xs"
-                {...getInputProps(fields.first, { type: "text" })}
+                {...getInputProps(fields.first, { type: 'text' })}
               />
               <ErrorList
                 id={fields.first.errorId}
@@ -227,7 +227,7 @@ export default function Component() {
             <div className="col-span-2 grid gap-2">
               <Input
                 className="max-w-xs"
-                {...getInputProps(fields.last, { type: "text" })}
+                {...getInputProps(fields.last, { type: 'text' })}
               />
               <ErrorList id={fields.last.errorId} errors={fields.last.errors} />
             </div>
@@ -242,7 +242,7 @@ export default function Component() {
             <div className="col-span-2 grid gap-2">
               <Input
                 className="max-w-xs"
-                {...getInputProps(fields.email, { type: "email" })}
+                {...getInputProps(fields.email, { type: 'email' })}
               />
               <ErrorList
                 id={fields.email.errorId}
@@ -257,7 +257,7 @@ export default function Component() {
             <div className="col-span-2 grid gap-2">
               <Input
                 className="max-w-xs"
-                {...getInputProps(fields.phone, { type: "tel" })}
+                {...getInputProps(fields.phone, { type: 'tel' })}
               />
               <ErrorList
                 id={fields.phone.errorId}
@@ -273,7 +273,7 @@ export default function Component() {
               <Input
                 className="max-w-xs"
                 {...getInputProps(fields.linkedin, {
-                  type: "text",
+                  type: 'text',
                   ariaDescribedBy: `${fields.linkedin.id}-desc`,
                 })}
               />
@@ -294,7 +294,7 @@ export default function Component() {
               <Input
                 className="max-w-xs"
                 {...getInputProps(fields.twitter, {
-                  type: "text",
+                  type: 'text',
                   ariaDescribedBy: `${fields.twitter.id}-desc`,
                 })}
               />
@@ -312,7 +312,7 @@ export default function Component() {
               Website URL
             </Label>
             <div className="col-span-2 grid gap-2">
-              <Input {...getInputProps(fields.website, { type: "url" })} />
+              <Input {...getInputProps(fields.website, { type: 'url' })} />
               <ErrorList
                 id={fields.website.errorId}
                 errors={fields.website.errors}
@@ -327,7 +327,7 @@ export default function Component() {
               Current location
             </Label>
             <div className="col-span-2 grid gap-2">
-              <Input {...getInputProps(fields.location, { type: "text" })} />
+              <Input {...getInputProps(fields.location, { type: 'text' })} />
               <ErrorList
                 id={fields.location.errorId}
                 errors={fields.location.errors}
@@ -341,7 +341,7 @@ export default function Component() {
             <div className="col-span-2 grid gap-2">
               <Input
                 className="max-w-xs"
-                {...getInputProps(fields.company, { type: "tel" })}
+                {...getInputProps(fields.company, { type: 'tel' })}
               />
               <ErrorList
                 id={fields.company.errorId}
@@ -356,7 +356,7 @@ export default function Component() {
             <div className="col-span-2 grid gap-2">
               <Input
                 className="max-w-fit"
-                {...getInputProps(fields.birthday, { type: "date" })}
+                {...getInputProps(fields.birthday, { type: 'date' })}
               />
               <ErrorList
                 id={fields.birthday.errorId}
@@ -371,12 +371,12 @@ export default function Component() {
             <div className="col-span-2 grid gap-2">
               <Textarea
                 onKeyDown={(event) => {
-                  if (event.key === "Enter" && event.ctrlKey) {
+                  if (event.key === 'Enter' && event.ctrlKey) {
                     // Submit form on ctrl+enter keydown event
-                    event.preventDefault();
+                    event.preventDefault()
                     event.currentTarget.form?.dispatchEvent(
-                      new Event("submit", { bubbles: true, cancelable: true }),
-                    );
+                      new Event('submit', { bubbles: true, cancelable: true }),
+                    )
                   }
                 }}
                 className="min-h-24"
@@ -395,17 +395,17 @@ export default function Component() {
         </div>
       </Form>
     </>
-  );
+  )
 }
 
 function CancelButton({
   className,
   children,
 }: {
-  className?: string;
-  children?: ReactNode;
+  className?: string
+  children?: ReactNode
 }) {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   return (
     <Button
@@ -416,5 +416,5 @@ function CancelButton({
     >
       {children}
     </Button>
-  );
+  )
 }

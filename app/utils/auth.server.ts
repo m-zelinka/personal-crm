@@ -1,59 +1,59 @@
-import type { Password, User } from "@prisma/client";
-import { redirect } from "@remix-run/node";
-import bcrypt from "bcryptjs";
-import { prisma } from "./db.server";
-import { authSessionStorage, getAuthSession } from "./session.server";
+import type { Password, User } from '@prisma/client'
+import { redirect } from '@remix-run/node'
+import bcrypt from 'bcryptjs'
+import { prisma } from './db.server'
+import { authSessionStorage, getAuthSession } from './session.server'
 
-const USER_SESSION_KEY = "userId";
+const USER_SESSION_KEY = 'userId'
 
 export async function getUserId(
   request: Request,
-): Promise<User["id"] | undefined> {
-  const session = await getAuthSession(request);
-  const userId = session.get(USER_SESSION_KEY);
+): Promise<User['id'] | undefined> {
+  const session = await getAuthSession(request)
+  const userId = session.get(USER_SESSION_KEY)
 
-  return userId;
+  return userId
 }
 
 export async function getUser(request: Request) {
-  const userId = await getUserId(request);
+  const userId = await getUserId(request)
 
   if (!userId) {
-    return null;
+    return null
   }
 
-  const user = await prisma.user.findUnique({ where: { id: userId } });
+  const user = await prisma.user.findUnique({ where: { id: userId } })
 
   if (!user) {
-    throw await logout(request);
+    throw await logout(request)
   }
 
-  return user;
+  return user
 }
 
 export async function requireUserId(
   request: Request,
   redirectTo: string = new URL(request.url).pathname,
 ) {
-  const userId = await getUserId(request);
+  const userId = await getUserId(request)
 
   if (!userId) {
-    const loginParams = new URLSearchParams([["redirectTo", redirectTo]]);
-    throw redirect(`/login?${loginParams}`);
+    const loginParams = new URLSearchParams([['redirectTo', redirectTo]])
+    throw redirect(`/login?${loginParams}`)
   }
 
-  return userId;
+  return userId
 }
 
 export async function requireUser(request: Request) {
-  const userId = await requireUserId(request);
-  const user = await prisma.user.findUnique({ where: { id: userId } });
+  const userId = await requireUserId(request)
+  const user = await prisma.user.findUnique({ where: { id: userId } })
 
   if (!user) {
-    throw await logout(request);
+    throw await logout(request)
   }
 
-  return user;
+  return user
 }
 
 export async function createUserSession({
@@ -62,23 +62,23 @@ export async function createUserSession({
   remember,
   redirectTo,
 }: {
-  request: Request;
-  userId: string;
-  remember: boolean;
-  redirectTo: string;
+  request: Request
+  userId: string
+  remember: boolean
+  redirectTo: string
 }) {
-  const session = await getAuthSession(request);
-  session.set(USER_SESSION_KEY, userId);
+  const session = await getAuthSession(request)
+  session.set(USER_SESSION_KEY, userId)
 
   return redirect(redirectTo, {
     headers: {
-      "Set-Cookie": await authSessionStorage.commitSession(session, {
+      'Set-Cookie': await authSessionStorage.commitSession(session, {
         maxAge: remember
           ? 60 * 60 * 24 * 7 // 7 days
           : undefined,
       }),
     },
-  });
+  })
 }
 
 export async function createUser({
@@ -87,8 +87,8 @@ export async function createUser({
   last,
   email,
   password,
-}: Pick<User, "username" | "first" | "last" | "email"> & { password: string }) {
-  const hashedPassword = await bcrypt.hash(password, 10);
+}: Pick<User, 'username' | 'first' | 'last' | 'email'> & { password: string }) {
+  const hashedPassword = await bcrypt.hash(password, 10)
 
   return await prisma.user.create({
     data: {
@@ -98,40 +98,37 @@ export async function createUser({
       email,
       password: { create: { hash: hashedPassword } },
     },
-  });
+  })
 }
 
 export async function verifyLogin(
-  email: User["email"],
-  password: Password["hash"],
+  email: User['email'],
+  password: Password['hash'],
 ) {
   const userWithPassword = await prisma.user.findUnique({
     include: { password: true },
     where: { email },
-  });
+  })
 
   if (!userWithPassword?.password) {
-    return null;
+    return null
   }
 
-  const isValid = await bcrypt.compare(
-    password,
-    userWithPassword.password.hash,
-  );
+  const isValid = await bcrypt.compare(password, userWithPassword.password.hash)
 
   if (!isValid) {
-    return null;
+    return null
   }
 
-  return { id: userWithPassword.id };
+  return { id: userWithPassword.id }
 }
 
 export async function logout(request: Request) {
-  const session = await getAuthSession(request);
+  const session = await getAuthSession(request)
 
-  return redirect("/", {
+  return redirect('/', {
     headers: {
-      "Set-Cookie": await authSessionStorage.destroySession(session),
+      'Set-Cookie': await authSessionStorage.destroySession(session),
     },
-  });
+  })
 }

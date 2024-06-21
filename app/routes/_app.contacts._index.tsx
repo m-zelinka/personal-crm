@@ -1,7 +1,7 @@
-import { PlusIcon } from "@heroicons/react/16/solid";
-import { Form } from "@remix-run/react";
-import { Empty } from "~/components/empty";
-import { Button } from "~/components/ui/button";
+import { PlusIcon } from '@heroicons/react/16/solid'
+import { Form } from '@remix-run/react'
+import { Empty } from '~/components/empty'
+import { Button } from '~/components/ui/button'
 
 export default function Component() {
   return (
@@ -16,5 +16,5 @@ export default function Component() {
         </Button>
       </Form>
     </Empty>
-  );
+  )
 }

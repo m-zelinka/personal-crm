@@ -1,15 +1,15 @@
-import type { MetaFunction } from "@remix-run/node";
-import { Link } from "@remix-run/react";
-import { Logo } from "~/components/logo";
-import { buttonVariants } from "~/components/ui/button";
-import { useOptionalUser } from "~/utils/user";
+import type { MetaFunction } from '@remix-run/node'
+import { Link } from '@remix-run/react'
+import { Logo } from '~/components/logo'
+import { buttonVariants } from '~/components/ui/button'
+import { useOptionalUser } from '~/utils/user'
 
 export const meta: MetaFunction = () => {
-  return [{ title: "Welcome" }];
-};
+  return [{ title: 'Welcome' }]
+}
 
 export default function Component() {
-  const user = useOptionalUser();
+  const user = useOptionalUser()
 
   return (
     <div className="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -33,7 +33,7 @@ export default function Component() {
                 </span>
               </Link>
               <p className="text-[0.8rem] text-muted-foreground">
-                Signed in as{" "}
+                Signed in as{' '}
                 <span className="font-medium text-foreground">
                   {user.email}
                 </span>
@@ -46,7 +46,7 @@ export default function Component() {
               </Link>
               <Link
                 to="/login"
-                className={buttonVariants({ variant: "ghost" })}
+                className={buttonVariants({ variant: 'ghost' })}
               >
                 <span>
                   Log in <span aria-hidden>→</span>
@@ -57,5 +57,5 @@ export default function Component() {
         </div>
       </div>
     </div>
-  );
+  )
 }

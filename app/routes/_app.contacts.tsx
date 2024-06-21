@@ -3,15 +3,15 @@ import {
   MagnifyingGlassIcon,
   PlusIcon,
   StarIcon,
-} from "@heroicons/react/16/solid";
-import type { Contact } from "@prisma/client";
+} from '@heroicons/react/16/solid'
+import type { Contact } from '@prisma/client'
 import {
   json,
   redirect,
   type ActionFunctionArgs,
   type LoaderFunctionArgs,
   type MetaFunction,
-} from "@remix-run/node";
+} from '@remix-run/node'
 import {
   Form,
   NavLink,
@@ -22,56 +22,56 @@ import {
   useResolvedPath,
   useSearchParams,
   useSubmit,
-} from "@remix-run/react";
-import { matchSorter } from "match-sorter";
-import { useEffect, useRef, type ReactNode } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
-import sortBy from "sort-by";
-import { useSpinDelay } from "spin-delay";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { ScrollArea } from "~/components/ui/scroll-area";
-import { requireUserId } from "~/utils/auth.server";
-import { prisma } from "~/utils/db.server";
-import { cx } from "~/utils/misc";
+} from '@remix-run/react'
+import { matchSorter } from 'match-sorter'
+import { useEffect, useRef, type ReactNode } from 'react'
+import { useHotkeys } from 'react-hotkeys-hook'
+import sortBy from 'sort-by'
+import { useSpinDelay } from 'spin-delay'
+import { Button } from '~/components/ui/button'
+import { Input } from '~/components/ui/input'
+import { ScrollArea } from '~/components/ui/scroll-area'
+import { requireUserId } from '~/utils/auth.server'
+import { prisma } from '~/utils/db.server'
+import { cx } from '~/utils/misc'
 
 export const meta: MetaFunction = () => {
-  return [{ title: "Contacts" }];
-};
+  return [{ title: 'Contacts' }]
+}
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const userId = await requireUserId(request);
+  const userId = await requireUserId(request)
 
-  const url = new URL(request.url);
-  const q = url.searchParams.get("q");
+  const url = new URL(request.url)
+  const q = url.searchParams.get('q')
 
   let contacts = await prisma.contact.findMany({
     select: { id: true, first: true, last: true, favorite: true },
     where: { userId },
-  });
+  })
 
   if (q) {
-    contacts = matchSorter(contacts, q, { keys: ["first", "last"] });
+    contacts = matchSorter(contacts, q, { keys: ['first', 'last'] })
   }
 
-  contacts = contacts.sort(sortBy("last", "createdAt"));
+  contacts = contacts.sort(sortBy('last', 'createdAt'))
 
-  return json({ contacts });
+  return json({ contacts })
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const userId = await requireUserId(request);
+  const userId = await requireUserId(request)
 
   const contact = await prisma.contact.create({
     select: { id: true },
     data: { user: { connect: { id: userId } } },
-  });
+  })
 
-  return redirect(`/contacts/${contact.id}/edit`);
+  return redirect(`/contacts/${contact.id}/edit`)
 }
 
 export default function Component() {
-  const { contacts } = useLoaderData<typeof loader>();
+  const { contacts } = useLoaderData<typeof loader>()
 
   return (
     <>
@@ -106,15 +106,15 @@ export default function Component() {
                     prefetch="intent"
                     className={({ isActive, isPending }) =>
                       cx(
-                        "group flex items-center gap-2 rounded-md border p-2 text-sm transition-all",
+                        'group flex items-center gap-2 rounded-md border p-2 text-sm transition-all',
                         isActive
-                          ? "bg-muted"
+                          ? 'bg-muted'
                           : isPending
-                            ? "bg-muted text-muted-foreground"
+                            ? 'bg-muted text-muted-foreground'
                             : contact.first || contact.last
-                              ? ""
-                              : "text-muted-foreground",
-                        !isActive && !isPending ? "hover:bg-muted" : "",
+                              ? ''
+                              : 'text-muted-foreground',
+                        !isActive && !isPending ? 'hover:bg-muted' : '',
                       )
                     }
                   >
@@ -126,16 +126,16 @@ export default function Component() {
                               {contact.first} {contact.last}
                             </>
                           ) : (
-                            "No Name"
+                            'No Name'
                           )}
                         </span>
                         <Favorite contact={contact}>
                           <StarIcon
                             className={cx(
-                              "size-4 flex-none",
+                              'size-4 flex-none',
                               isActive
-                                ? ""
-                                : "text-muted-foreground group-hover:text-foreground",
+                                ? ''
+                                : 'text-muted-foreground group-hover:text-foreground',
                             )}
                           />
                         </Favorite>
@@ -151,55 +151,55 @@ export default function Component() {
         </ScrollArea>
       </aside>
     </>
-  );
+  )
 }
 
 function DetailLoadingOverlay({ children }: { children?: ReactNode }) {
-  const navigation = useNavigation();
-  const loading = navigation.state === "loading";
-  const searchingContacts = useIsSearchingContacts();
-  const showOverlay = useSpinDelay(loading && !searchingContacts);
+  const navigation = useNavigation()
+  const loading = navigation.state === 'loading'
+  const searchingContacts = useIsSearchingContacts()
+  const showOverlay = useSpinDelay(loading && !searchingContacts)
 
   if (showOverlay) {
-    return <div className="opacity-50 transition-opacity">{children}</div>;
+    return <div className="opacity-50 transition-opacity">{children}</div>
   }
 
-  return children;
+  return children
 }
 
 function SearchBar() {
-  const [searchParams] = useSearchParams();
-  const q = searchParams.get("q");
+  const [searchParams] = useSearchParams()
+  const q = searchParams.get('q')
 
-  const searching = useIsSearchingContacts();
-  const showSpinner = useSpinDelay(searching);
+  const searching = useIsSearchingContacts()
+  const showSpinner = useSpinDelay(searching)
 
   // Used to submit the form for every keystroke
-  const submit = useSubmit();
+  const submit = useSubmit()
 
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null)
 
   // Sync search input value with the URL Search Params
   useEffect(() => {
-    const searchField = inputRef.current;
+    const searchField = inputRef.current
     if (searchField) {
-      searchField.value = q ?? "";
+      searchField.value = q ?? ''
     }
-  }, [q]);
+  }, [q])
 
   // Focus input on key press
-  const keyShortcut = "/";
+  const keyShortcut = '/'
   useHotkeys(
     keyShortcut,
     () => {
-      const searchField = inputRef.current;
+      const searchField = inputRef.current
       if (searchField) {
-        searchField.focus();
-        searchField.select();
+        searchField.focus()
+        searchField.select()
       }
     },
     { preventDefault: true },
-  );
+  )
 
   return (
     <div className="relative">
@@ -220,10 +220,10 @@ function SearchBar() {
         id="q"
         defaultValue={q ?? undefined}
         onChange={(event) => {
-          const isFirstSearch = q === null;
+          const isFirstSearch = q === null
           submit(event.currentTarget.form, {
             replace: !isFirstSearch,
-          });
+          })
         }}
         className="pl-8 pr-10"
         placeholder="Search"
@@ -239,34 +239,34 @@ function SearchBar() {
         </kbd>
       </div>
     </div>
-  );
+  )
 }
 
 function useIsSearchingContacts() {
-  const navigation = useNavigation();
-  const contactsRoute = useResolvedPath("/contacts");
+  const navigation = useNavigation()
+  const contactsRoute = useResolvedPath('/contacts')
   const searching =
     navigation.location?.pathname === contactsRoute.pathname &&
-    new URLSearchParams(navigation.location?.search).has("q");
+    new URLSearchParams(navigation.location?.search).has('q')
 
-  return searching;
+  return searching
 }
 
 function Favorite({
   contact,
   children,
 }: {
-  contact: Pick<Contact, "id" | "favorite">;
-  children: ReactNode;
+  contact: Pick<Contact, 'id' | 'favorite'>
+  children: ReactNode
 }) {
-  const fetcher = useFetcher({ key: `contact:${contact.id}` });
+  const fetcher = useFetcher({ key: `contact:${contact.id}` })
   const favorite = fetcher.formData
-    ? fetcher.formData.get("favorite") === "true"
-    : contact.favorite;
+    ? fetcher.formData.get('favorite') === 'true'
+    : contact.favorite
 
   if (!favorite) {
-    return null;
+    return null
   }
 
-  return children;
+  return children
 }

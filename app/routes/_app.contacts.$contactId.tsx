@@ -1,13 +1,13 @@
-import { invariant, invariantResponse } from "@epic-web/invariant";
-import { PencilIcon, StarIcon, TrashIcon } from "@heroicons/react/16/solid";
-import type { Contact } from "@prisma/client";
+import { invariant, invariantResponse } from '@epic-web/invariant'
+import { PencilIcon, StarIcon, TrashIcon } from '@heroicons/react/16/solid'
+import type { Contact } from '@prisma/client'
 import {
   json,
   redirect,
   type ActionFunctionArgs,
   type LoaderFunctionArgs,
   type MetaFunction,
-} from "@remix-run/node";
+} from '@remix-run/node'
 import {
   Form,
   NavLink,
@@ -15,14 +15,14 @@ import {
   useFetcher,
   useLoaderData,
   type NavLinkProps,
-} from "@remix-run/react";
-import { GeneralErrorBoundary } from "~/components/error-boundary";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Button } from "~/components/ui/button";
-import { Toggle } from "~/components/ui/toggle";
-import { requireUserId } from "~/utils/auth.server";
-import { prisma } from "~/utils/db.server";
-import { cx } from "~/utils/misc";
+} from '@remix-run/react'
+import { GeneralErrorBoundary } from '~/components/error-boundary'
+import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
+import { Button } from '~/components/ui/button'
+import { Toggle } from '~/components/ui/toggle'
+import { requireUserId } from '~/utils/auth.server'
+import { prisma } from '~/utils/db.server'
+import { cx } from '~/utils/misc'
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
@@ -30,78 +30,78 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
       title: data?.contact
         ? data.contact.first || data.contact.last
           ? `${data.contact.first} ${data.contact.last}`
-          : "No Name"
-        : "No contact found",
+          : 'No Name'
+        : 'No contact found',
     },
-  ];
-};
+  ]
+}
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
-  const userId = await requireUserId(request);
+  const userId = await requireUserId(request)
 
-  invariant(params.contactId, "Missing contactId param");
+  invariant(params.contactId, 'Missing contactId param')
   const contact = await prisma.contact.findUnique({
     select: { id: true, first: true, last: true, avatar: true, favorite: true },
     where: { id: params.contactId, userId },
-  });
+  })
   invariantResponse(
     contact,
     `No contact with the id "${params.contactId}" exists.`,
     { status: 404 },
-  );
+  )
 
-  return json({ contact });
+  return json({ contact })
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
-  const userId = await requireUserId(request);
+  const userId = await requireUserId(request)
 
-  invariant(params.contactId, "Missing contactId param");
+  invariant(params.contactId, 'Missing contactId param')
   const contact = await prisma.contact.findUnique({
     select: { id: true },
     where: { id: params.contactId, userId },
-  });
+  })
   invariantResponse(
     contact,
     `No contact with the id "${params.contactId}" exists.`,
     { status: 404 },
-  );
+  )
 
-  const formData = await request.formData();
+  const formData = await request.formData()
 
-  if (formData.get("intent") === "favorite") {
-    const favorite = formData.get("favorite");
+  if (formData.get('intent') === 'favorite') {
+    const favorite = formData.get('favorite')
 
     await prisma.contact.update({
       select: { id: true },
-      data: { favorite: favorite === "true" },
+      data: { favorite: favorite === 'true' },
       where: { id: params.contactId, userId },
-    });
+    })
 
-    return json({ ok: true });
+    return json({ ok: true })
   }
 
-  if (formData.get("intent") === "delete") {
+  if (formData.get('intent') === 'delete') {
     await prisma.contact.delete({
       select: { id: true },
       where: { id: contact.id, userId },
-    });
+    })
 
-    return redirect("/contacts");
+    return redirect('/contacts')
   }
 
   invariantResponse(
     false,
-    `Invalid intent: ${formData.get("intent") ?? "Missing"}`,
-  );
+    `Invalid intent: ${formData.get('intent') ?? 'Missing'}`,
+  )
 }
 
 export function ErrorBoundary() {
-  return <GeneralErrorBoundary />;
+  return <GeneralErrorBoundary />
 }
 
 export default function Component() {
-  const { contact } = useLoaderData<typeof loader>();
+  const { contact } = useLoaderData<typeof loader>()
 
   return (
     <>
@@ -125,8 +125,8 @@ export default function Component() {
         <div className="ml-5 flex w-full min-w-0 items-baseline gap-3 pb-1">
           <h1
             className={cx(
-              "text-2xl font-semibold leading-none tracking-tight",
-              contact.first || contact.last ? "" : "text-muted-foreground",
+              'text-2xl font-semibold leading-none tracking-tight',
+              contact.first || contact.last ? '' : 'text-muted-foreground',
             )}
           >
             {contact.first || contact.last ? (
@@ -134,7 +134,7 @@ export default function Component() {
                 {contact.first} {contact.last}
               </>
             ) : (
-              "No Name"
+              'No Name'
             )}
           </h1>
           <Favorite contact={contact} />
@@ -150,11 +150,11 @@ export default function Component() {
             method="post"
             onSubmit={(event) => {
               const shouldDelete = confirm(
-                "Please confirm you want to delete this record.",
-              );
+                'Please confirm you want to delete this record.',
+              )
 
               if (!shouldDelete) {
-                event.preventDefault();
+                event.preventDefault()
               }
             }}
           >
@@ -173,14 +173,14 @@ export default function Component() {
         <Outlet />
       </div>
     </>
-  );
+  )
 }
 
-function Favorite({ contact }: { contact: Pick<Contact, "id" | "favorite"> }) {
-  const fetcher = useFetcher({ key: `contact:${contact.id}` });
+function Favorite({ contact }: { contact: Pick<Contact, 'id' | 'favorite'> }) {
+  const fetcher = useFetcher({ key: `contact:${contact.id}` })
   const favorite = fetcher.formData
-    ? fetcher.formData.get("favorite") === "true"
-    : contact.favorite;
+    ? fetcher.formData.get('favorite') === 'true'
+    : contact.favorite
 
   return (
     <fetcher.Form method="post">
@@ -188,25 +188,25 @@ function Favorite({ contact }: { contact: Pick<Contact, "id" | "favorite"> }) {
       <input
         type="hidden"
         name="favorite"
-        value={favorite ? "false" : "true"}
+        value={favorite ? 'false' : 'true'}
       />
       <Toggle
         type="submit"
         aria-label={
-          contact.favorite ? "Remove from favorites" : "Add to favorites"
+          contact.favorite ? 'Remove from favorites' : 'Add to favorites'
         }
       >
         <StarIcon className="size-4" />
       </Toggle>
     </fetcher.Form>
-  );
+  )
 }
 
 function TabNav() {
-  const tabs: Array<{ name: string; to: NavLinkProps["to"] }> = [
-    { name: "Profile", to: "." },
-    { name: "Notes", to: "notes" },
-  ];
+  const tabs: Array<{ name: string; to: NavLinkProps['to'] }> = [
+    { name: 'Profile', to: '.' },
+    { name: 'Notes', to: 'notes' },
+  ]
 
   return (
     <nav
@@ -222,10 +222,10 @@ function TabNav() {
           preventScrollReset
           className={({ isActive }) =>
             cx(
-              "inline-flex h-9 items-center justify-center whitespace-nowrap border-b-2 px-4 pb-3 pt-2 text-sm font-semibold text-muted-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+              'inline-flex h-9 items-center justify-center whitespace-nowrap border-b-2 px-4 pb-3 pt-2 text-sm font-semibold text-muted-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
               isActive
-                ? "border-b-primary text-foreground"
-                : "border-b-transparent",
+                ? 'border-b-primary text-foreground'
+                : 'border-b-transparent',
             )
           }
         >
@@ -233,5 +233,5 @@ function TabNav() {
         </NavLink>
       ))}
     </nav>
-  );
+  )
 }

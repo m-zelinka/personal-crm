@@ -1,12 +1,12 @@
-import { ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/outline";
-import { Form, Outlet } from "@remix-run/react";
-import { Logo } from "~/components/logo";
-import { Button } from "~/components/ui/button";
+import { ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/outline'
+import { Form, Outlet } from '@remix-run/react'
+import { Logo } from '~/components/logo'
+import { Button } from '~/components/ui/button'
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "~/components/ui/tooltip";
+} from '~/components/ui/tooltip'
 
 export default function Component() {
   return (
@@ -29,11 +29,11 @@ export default function Component() {
         <Outlet />
       </div>
     </div>
-  );
+  )
 }
 
 function SignoutForm() {
-  const buttonLabel = "Sign out";
+  const buttonLabel = 'Sign out'
 
   return (
     <Form method="post" action="/logout">
@@ -52,5 +52,5 @@ function SignoutForm() {
         <TooltipContent side="right">{buttonLabel}</TooltipContent>
       </Tooltip>
     </Form>
-  );
+  )
 }

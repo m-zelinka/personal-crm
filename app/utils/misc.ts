@@ -1,13 +1,13 @@
-import { defineConfig } from "cva";
-import { twMerge } from "tailwind-merge";
+import { defineConfig } from 'cva'
+import { twMerge } from 'tailwind-merge'
 
-export type { VariantProps } from "cva";
+export type { VariantProps } from 'cva'
 
 export const { cva, cx, compose } = defineConfig({
   hooks: {
     onComplete: (className) => twMerge(className),
   },
-});
+})
 
 /**
  * This should be used any time the redirect path is user-provided
@@ -18,22 +18,22 @@ export const { cva, cx, compose } = defineConfig({
  */
 export function composeSafeRedirectUrl(
   to: FormDataEntryValue | string | null | undefined,
-  defaultRedirect: string = "/",
+  defaultRedirect: string = '/',
 ) {
-  if (!to || typeof to !== "string") {
-    return defaultRedirect;
+  if (!to || typeof to !== 'string') {
+    return defaultRedirect
   }
 
-  to = to.trim();
+  to = to.trim()
 
   if (
-    !to.startsWith("/") ||
-    to.startsWith("//") ||
-    to.startsWith("/\\") ||
-    to.includes("..")
+    !to.startsWith('/') ||
+    to.startsWith('//') ||
+    to.startsWith('/\\') ||
+    to.includes('..')
   ) {
-    return defaultRedirect;
+    return defaultRedirect
   }
 
-  return to;
+  return to
 }

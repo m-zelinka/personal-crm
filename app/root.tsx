@@ -2,35 +2,35 @@ import {
   json,
   type LinksFunction,
   type LoaderFunctionArgs,
-} from "@remix-run/node";
+} from '@remix-run/node'
 import {
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
-} from "@remix-run/react";
-import type { ReactNode } from "react";
-import { TooltipProvider } from "./components/ui/tooltip";
-import fontStyleSheetUrl from "./styles/font.css?url";
-import tailwindStyleSheetUrl from "./styles/tailwind.css?url";
-import { getUser } from "./utils/auth.server";
+} from '@remix-run/react'
+import type { ReactNode } from 'react'
+import { TooltipProvider } from './components/ui/tooltip'
+import fontStyleSheetUrl from './styles/font.css?url'
+import tailwindStyleSheetUrl from './styles/tailwind.css?url'
+import { getUser } from './utils/auth.server'
 
 export const links: LinksFunction = () => {
   return [
     // Preload CSS as a resource to avoid render blocking
-    { rel: "preload", href: fontStyleSheetUrl, as: "style" },
-    { rel: "preload", href: tailwindStyleSheetUrl, as: "style" },
+    { rel: 'preload', href: fontStyleSheetUrl, as: 'style' },
+    { rel: 'preload', href: tailwindStyleSheetUrl, as: 'style' },
     // Matching the css preloads above to avoid css as render blocking resource
-    { rel: "stylesheet", href: fontStyleSheetUrl, as: "style" },
-    { rel: "stylesheet", href: tailwindStyleSheetUrl, as: "style" },
-  ];
-};
+    { rel: 'stylesheet', href: fontStyleSheetUrl, as: 'style' },
+    { rel: 'stylesheet', href: tailwindStyleSheetUrl, as: 'style' },
+  ]
+}
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const user = await getUser(request);
+  const user = await getUser(request)
 
-  return json({ user });
+  return json({ user })
 }
 
 export function Layout({ children }: { children: ReactNode }) {
@@ -48,9 +48,9 @@ export function Layout({ children }: { children: ReactNode }) {
         <Scripts />
       </body>
     </html>
-  );
+  )
 }
 
 export default function App() {
-  return <Outlet />;
+  return <Outlet />
 }

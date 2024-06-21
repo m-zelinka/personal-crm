@@ -1,13 +1,13 @@
-import { type ReactNode } from "react";
+import { type ReactNode } from 'react'
 
 export function Empty({
-  title = "No data",
+  title = 'No data',
   description,
   children,
 }: {
-  title?: string;
-  description?: string;
-  children?: ReactNode;
+  title?: string
+  description?: string
+  children?: ReactNode
 }) {
   return (
     <div className="flex flex-col items-center gap-1 text-center">
@@ -17,5 +17,5 @@ export function Empty({
       ) : null}
       {children ? <div className="mt-4">{children}</div> : null}
     </div>
-  );
+  )
 }
