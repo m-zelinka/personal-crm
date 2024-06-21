@@ -5,7 +5,7 @@ export function Logo({ className }: { className?: string }) {
     <svg
       viewBox="0 0 200 200"
       fill="currentColor"
-      className={cx('text-blue-600', className)}
+      className={cx('text-primary', className)}
       aria-hidden
     >
       <path
