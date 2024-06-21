@@ -1,5 +1,3 @@
-"use client";
-
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { isRouteErrorResponse, useRouteError } from "@remix-run/react";
 

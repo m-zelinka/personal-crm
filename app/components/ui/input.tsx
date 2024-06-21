@@ -1,5 +1,3 @@
-"use client";
-
 import { forwardRef, type InputHTMLAttributes } from "react";
 import { cx } from "~/utils/misc";
 

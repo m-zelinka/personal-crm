@@ -1,5 +1,3 @@
-"use client";
-
 import { cx } from "~/utils/misc";
 
 export function Logo({ className }: { className?: string }) {
