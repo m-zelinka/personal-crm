@@ -77,7 +77,7 @@ export default function Component() {
     <>
       <main className="pl-96">
         <DetailLoadingOverlay>
-          <div className="max-w-3xl p-6">
+          <div className="mx-auto max-w-3xl p-6">
             <Outlet />
           </div>
         </DetailLoadingOverlay>
