@@ -192,6 +192,7 @@ function Favorite({ contact }: { contact: Pick<Contact, 'id' | 'favorite'> }) {
       />
       <Toggle
         type="submit"
+        pressed={favorite}
         aria-label={
           contact.favorite ? 'Remove from favorites' : 'Add to favorites'
         }
