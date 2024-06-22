@@ -110,7 +110,7 @@ export default function Component() {
                         isActive
                           ? 'bg-muted'
                           : isPending
-                            ? 'bg-muted text-muted-foreground'
+                            ? 'bg-muted text-primary'
                             : contact.first || contact.last
                               ? ''
                               : 'text-muted-foreground',
