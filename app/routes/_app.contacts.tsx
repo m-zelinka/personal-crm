@@ -262,7 +262,7 @@ function Favorite({
   const fetcher = useFetcher({ key: `contact:${contact.id}` })
   const favorite = fetcher.formData
     ? fetcher.formData.get('favorite') === 'true'
-    : contact.favorite
+    : Boolean(contact.favorite)
 
   if (!favorite) {
     return null

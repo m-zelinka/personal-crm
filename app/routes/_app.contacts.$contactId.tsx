@@ -180,7 +180,7 @@ function Favorite({ contact }: { contact: Pick<Contact, 'id' | 'favorite'> }) {
   const fetcher = useFetcher({ key: `contact:${contact.id}` })
   const favorite = fetcher.formData
     ? fetcher.formData.get('favorite') === 'true'
-    : contact.favorite
+    : Boolean(contact.favorite)
 
   return (
     <fetcher.Form method="post">
