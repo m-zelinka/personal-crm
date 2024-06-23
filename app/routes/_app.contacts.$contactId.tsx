@@ -193,6 +193,9 @@ function Favorite({ contact }: { contact: Pick<Contact, 'id' | 'favorite'> }) {
       <Toggle
         type="submit"
         pressed={favorite}
+        className={
+          contact.favorite ? '' : 'text-muted-foreground hover:text-foreground'
+        }
         aria-label={
           contact.favorite ? 'Remove from favorites' : 'Add to favorites'
         }
