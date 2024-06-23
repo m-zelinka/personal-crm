@@ -98,7 +98,7 @@ export default function Component() {
         </div>
         <ScrollArea className="flex-1 p-4">
           {contacts.length ? (
-            <ul className="grid gap-2">
+            <ul>
               {contacts.map((contact) => (
                 <li key={contact.id}>
                   <NavLink
@@ -106,15 +106,13 @@ export default function Component() {
                     prefetch="intent"
                     className={({ isActive, isPending }) =>
                       cx(
-                        'group flex items-center gap-2 rounded-md border p-2 text-sm transition-all',
-                        isActive
-                          ? 'bg-muted'
-                          : isPending
-                            ? 'bg-muted text-primary'
-                            : contact.first || contact.last
-                              ? ''
-                              : 'text-muted-foreground',
-                        !isActive && !isPending ? 'hover:bg-muted' : '',
+                        'group flex items-center gap-2 rounded-md p-2 text-sm transition-all',
+                        isPending
+                          ? 'text-primary'
+                          : contact.first || contact.last
+                            ? ''
+                            : 'text-muted-foreground',
+                        isActive || isPending ? 'bg-muted' : 'hover:bg-muted',
                       )
                     }
                   >
