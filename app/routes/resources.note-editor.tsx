@@ -106,6 +106,8 @@ export function NoteEditor({ contactId }: { contactId: Contact['id'] }) {
           contactId,
           text,
           id: window.crypto.randomUUID(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
         },
         {
           method: context.method,
