@@ -218,7 +218,7 @@ function TabNav() {
         <NavLink
           key={tab.name}
           to={tab.to}
-          end
+          end={tab.to === '.'}
           prefetch="intent"
           preventScrollReset
           className={({ isActive }) =>

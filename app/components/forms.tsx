@@ -39,7 +39,7 @@ export function Description({
   children: ReactNode
 }) {
   return (
-    <p id={id} className={cx('text-sm text-muted-foreground', className)}>
+    <p id={id} className={cx('text-[0.8rem] text-muted-foreground', className)}>
       {children}
     </p>
   )
