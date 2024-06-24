@@ -110,7 +110,7 @@ export default function Component() {
           <Avatar key={contact.avatar} className="size-32">
             <AvatarImage src={contact.avatar ?? undefined} alt="" />
             <AvatarFallback>
-              <span className="bg-muted" aria-hidden>
+              <span className="bg-muted/40" aria-hidden>
                 <svg
                   className="h-full w-full text-muted-foreground"
                   fill="currentColor"
