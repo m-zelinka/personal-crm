@@ -1,15 +1,18 @@
-import { invariant } from '@epic-web/invariant'
-import { CloudIcon } from '@heroicons/react/16/solid'
+import { invariant, invariantResponse } from '@epic-web/invariant'
+import { CloudIcon, PencilIcon, TrashIcon } from '@heroicons/react/16/solid'
 import {
   json,
+  type ActionFunctionArgs,
   type LoaderFunctionArgs,
   type SerializeFrom,
 } from '@remix-run/node'
-import { useFetchers, useLoaderData } from '@remix-run/react'
+import { useFetcher, useFetchers, useLoaderData } from '@remix-run/react'
 import { compareDesc, format, isEqual, isThisYear } from 'date-fns'
 import { useSpinDelay } from 'spin-delay'
 import { Empty } from '~/components/empty'
 import { GeneralErrorBoundary } from '~/components/error-boundary'
+import { Button } from '~/components/ui/button'
+import { requireUserId } from '~/utils/auth.server'
 import { prisma } from '~/utils/db.server'
 import { NoteEditor } from './resources.note-editor'
 
@@ -24,6 +27,52 @@ export async function loader({ params }: LoaderFunctionArgs) {
   })
 
   return json({ contactId: params.contactId, notes })
+}
+
+export async function action({ request, params }: ActionFunctionArgs) {
+  const userId = await requireUserId(request)
+
+  invariant(params.contactId, 'Missing contactId param')
+  const contact = await prisma.contact.findUnique({
+    select: { id: true },
+    where: { id: params.contactId, userId },
+  })
+  invariantResponse(
+    contact,
+    `No contact with the id "${params.contactId}" exists.`,
+    { status: 404 },
+  )
+
+  const formData = await request.formData()
+
+  if (formData.get('intent') === 'deleteNote') {
+    const noteId = formData.get('noteId')
+    invariantResponse(
+      typeof noteId === 'string',
+      `Invalid noteId: ${noteId ?? 'Missing'}`,
+      { status: 400 },
+    )
+
+    const note = await prisma.note.findUnique({
+      select: { id: true },
+      where: { id: noteId, contactId: params.contactId },
+    })
+    invariantResponse(note, `No note with the id "${noteId}" exists`, {
+      status: 404,
+    })
+
+    await prisma.note.delete({
+      select: { id: true },
+      where: { id: note.id, contactId: params.contactId },
+    })
+
+    return json({ ok: true })
+  }
+
+  invariantResponse(
+    false,
+    `Invalid intent: ${formData.get('intent') ?? 'Missing'}`,
+  )
 }
 
 export function ErrorBoundary() {
@@ -116,6 +165,9 @@ function NoteList({ notes }: { notes: Array<Note> }) {
 }
 
 function NoteItem({ note }: { note: Note }) {
+  const deleteFetcher = useFetcher()
+  const deleting = deleteFetcher.state !== 'idle'
+
   const createdLabel = format(
     note.createdAt,
     isThisYear(note.createdAt) ? 'MMM dd' : 'PP',
@@ -126,8 +178,8 @@ function NoteItem({ note }: { note: Note }) {
   )
   const updatedAfterCreated = !isEqual(note.createdAt, note.updatedAt)
 
-  return (
-    <li key={note.id} className="group relative flex gap-4">
+  return deleting ? null : (
+    <li className="group relative flex gap-4">
       <div
         className="absolute -bottom-6 left-0 top-0 flex w-6 justify-center group-last-of-type:h-0"
         aria-hidden
@@ -160,7 +212,28 @@ function NoteItem({ note }: { note: Note }) {
             </>
           ) : null}
         </div>
-        <p className="text-sm text-foreground">{note.text}</p>
+        <div className="group overflow-hidden rounded-lg border bg-muted/40 focus-within:bg-white hover:bg-white">
+          <div className="min-h-12 p-3">
+            <p className="text-sm text-foreground">{note.text}</p>
+          </div>
+          <div className="flex items-center justify-end p-3 pt-0 opacity-0 focus-within:opacity-100 group-hover:opacity-100">
+            <Button variant="ghost" size="icon" aria-label="Edit">
+              <PencilIcon className="size-4" />
+            </Button>
+            <deleteFetcher.Form method="POST">
+              <input type="hidden" name="intent" value="deleteNote" />
+              <input type="hidden" name="noteId" value={note.id} />
+              <Button
+                type="submit"
+                variant="ghost"
+                size="icon"
+                aria-label="Delete"
+              >
+                <TrashIcon className="size-4" />
+              </Button>
+            </deleteFetcher.Form>
+          </div>
+        </div>
       </div>
     </li>
   )
