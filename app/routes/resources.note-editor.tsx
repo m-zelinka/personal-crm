@@ -150,7 +150,7 @@ export function NoteEditor({ contactId }: { contactId: Contact['id'] }) {
       <input type="hidden" name="intent" value="createNote" />
       <input {...getInputProps(fields.contactId, { type: 'hidden' })} />
       <div className="grid gap-1">
-        <div className="relative overflow-hidden rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring">
+        <div className="overflow-hidden rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring">
           <Label id={fields.text.id} className="sr-only">
             Note
           </Label>
