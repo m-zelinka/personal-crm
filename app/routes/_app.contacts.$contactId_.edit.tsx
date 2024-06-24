@@ -23,7 +23,7 @@ import { format } from 'date-fns'
 import type { ReactNode } from 'react'
 import { z } from 'zod'
 import { GeneralErrorBoundary } from '~/components/error-boundary'
-import { Description, ErrorList } from '~/components/forms'
+import { ErrorList } from '~/components/forms'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
@@ -267,19 +267,13 @@ export default function Component() {
           </div>
           <div className="grid grid-cols-3 items-start gap-4">
             <Label htmlFor={fields.linkedin.id} className="pt-3">
-              LinkedIn
+              LinkedIn username
             </Label>
             <div className="col-span-2 grid gap-2">
               <Input
                 className="max-w-xs"
-                {...getInputProps(fields.linkedin, {
-                  type: 'text',
-                  ariaDescribedBy: `${fields.linkedin.id}-desc`,
-                })}
+                {...getInputProps(fields.linkedin, { type: 'text' })}
               />
-              <Description id={`${fields.linkedin.id}-desc`}>
-                LinkedIn username
-              </Description>
               <ErrorList
                 id={fields.linkedin.errorId}
                 errors={fields.linkedin.errors}
@@ -288,19 +282,13 @@ export default function Component() {
           </div>
           <div className="grid grid-cols-3 items-start gap-4">
             <Label htmlFor={fields.twitter.id} className="pt-3">
-              X (Twitter)
+              X (Twitter) username
             </Label>
             <div className="col-span-2 grid gap-2">
               <Input
                 className="max-w-xs"
-                {...getInputProps(fields.twitter, {
-                  type: 'text',
-                  ariaDescribedBy: `${fields.twitter.id}-desc`,
-                })}
+                {...getInputProps(fields.twitter, { type: 'text' })}
               />
-              <Description id={`${fields.twitter.id}-desc`}>
-                X username
-              </Description>
               <ErrorList
                 id={fields.twitter.errorId}
                 errors={fields.twitter.errors}
