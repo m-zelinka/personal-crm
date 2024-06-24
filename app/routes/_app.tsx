@@ -44,9 +44,9 @@ function SignoutForm() {
             variant="ghost"
             size="icon"
             className="rounded-lg"
-            aria-label={buttonLabel}
           >
             <ArrowRightStartOnRectangleIcon className="size-6" />
+            <span className="sr-only">{buttonLabel}</span>
           </Button>
         </TooltipTrigger>
         <TooltipContent side="right">{buttonLabel}</TooltipContent>

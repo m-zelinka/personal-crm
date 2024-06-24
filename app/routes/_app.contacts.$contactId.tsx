@@ -196,11 +196,11 @@ function Favorite({ contact }: { contact: Pick<Contact, 'id' | 'favorite'> }) {
         className={
           contact.favorite ? '' : 'text-muted-foreground hover:text-foreground'
         }
-        aria-label={
-          contact.favorite ? 'Remove from favorites' : 'Add to favorites'
-        }
       >
         <StarIcon className="size-4" />
+        <span className="sr-only">
+          {contact.favorite ? 'Remove from favorites' : 'Add to favorites'}
+        </span>
       </Toggle>
     </fetcher.Form>
   )

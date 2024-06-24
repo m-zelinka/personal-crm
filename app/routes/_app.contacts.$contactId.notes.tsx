@@ -218,20 +218,17 @@ function NoteItem({ note }: { note: Note }) {
           </div>
           <div className="flex items-center justify-end p-3 pt-0 opacity-0 focus-within:opacity-100 group-hover:opacity-100">
             <Form action={`${note.id}/edit`}>
-              <Button variant="ghost" size="icon" aria-label="Edit">
+              <Button variant="ghost" size="icon">
                 <PencilIcon className="size-4" />
+                <span className="sr-only">Edit</span>
               </Button>
             </Form>
             <deleteFetcher.Form method="POST">
               <input type="hidden" name="intent" value="deleteNote" />
               <input type="hidden" name="noteId" value={note.id} />
-              <Button
-                type="submit"
-                variant="ghost"
-                size="icon"
-                aria-label="Delete"
-              >
+              <Button type="submit" variant="ghost" size="icon">
                 <TrashIcon className="size-4" />
+                <span className="sr-only">Delete</span>
               </Button>
             </deleteFetcher.Form>
           </div>
