@@ -1,5 +1,11 @@
 import { invariant, invariantResponse } from '@epic-web/invariant'
-import { CloudIcon, PencilIcon, TrashIcon } from '@heroicons/react/16/solid'
+import {
+  ClipboardDocumentCheckIcon,
+  ClipboardIcon,
+  CloudIcon,
+  PencilIcon,
+  TrashIcon,
+} from '@heroicons/react/16/solid'
 import {
   json,
   type ActionFunctionArgs,
@@ -8,6 +14,7 @@ import {
 } from '@remix-run/node'
 import { Form, useFetcher, useFetchers, useLoaderData } from '@remix-run/react'
 import { compareDesc, format, isEqual, isThisYear } from 'date-fns'
+import { useEffect, useState } from 'react'
 import { useSpinDelay } from 'spin-delay'
 import { Empty } from '~/components/empty'
 import { GeneralErrorBoundary } from '~/components/error-boundary'
@@ -231,9 +238,50 @@ function NoteItem({ note }: { note: Note }) {
                 <span className="sr-only">Delete</span>
               </Button>
             </deleteFetcher.Form>
+            <CopyNoteButton text={note.text} />
           </div>
         </div>
       </div>
     </li>
+  )
+}
+
+function CopyNoteButton({ text }: { text: string }) {
+  const [{ state, i }, setState] = useState<{
+    state: 'idle' | 'copied'
+    i: number
+  }>({ state: 'idle', i: 0 })
+
+  async function handleClick() {
+    await navigator.clipboard.writeText(text)
+    setState({ state: 'copied', i: i + 1 })
+  }
+
+  useEffect(() => {
+    if (state === 'copied') {
+      const handle = window.setTimeout(() => {
+        setState({ state: 'idle', i: i + 1 })
+      }, 1500)
+
+      return function cleanup() {
+        window.clearTimeout(handle)
+      }
+    }
+  }, [state, i])
+
+  return (
+    <Button type="button" variant="ghost" size="icon" onClick={handleClick}>
+      {state === 'idle' ? (
+        <>
+          <ClipboardIcon className="size-4" />
+          <span className="sr-only">Copy</span>
+        </>
+      ) : (
+        <>
+          <ClipboardDocumentCheckIcon className="size-4" />
+          <span className="sr-only">Copied</span>
+        </>
+      )}
+    </Button>
   )
 }
