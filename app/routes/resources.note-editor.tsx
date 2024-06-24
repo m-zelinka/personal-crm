@@ -7,10 +7,11 @@ import {
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { invariantResponse } from '@epic-web/invariant'
 import type { Contact } from '@prisma/client'
-import { json, type ActionFunctionArgs } from '@remix-run/node'
-import { Form, useActionData, useSubmit } from '@remix-run/react'
+import { json, redirect, type ActionFunctionArgs } from '@remix-run/node'
+import { Form, useActionData, useNavigation, useSubmit } from '@remix-run/react'
 import { useRef } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
+import { useSpinDelay } from 'spin-delay'
 import { z } from 'zod'
 import { Description, ErrorList } from '~/components/forms'
 import { Button } from '~/components/ui/button'
@@ -18,8 +19,15 @@ import { Label } from '~/components/ui/label'
 import { Textarea } from '~/components/ui/textarea'
 import { requireUserId } from '~/utils/auth.server'
 import { prisma } from '~/utils/db.server'
+import type { Note } from './_app.contacts.$contactId.notes'
 
 const schema = z.object({
+  id: z
+    .string()
+    .trim()
+    .uuid('Id is invalid')
+    .optional()
+    .transform((arg) => arg || null),
   contactId: z
     .string({ required_error: 'Contact ID is required' })
     .trim()
@@ -60,7 +68,7 @@ export async function action({ request }: ActionFunctionArgs) {
     )
   }
 
-  const { contactId, text } = submission.value
+  const { contactId, id: noteId, text } = submission.value
 
   if (formData.get('intent') === 'createNote') {
     await prisma.note.create({
@@ -71,26 +79,60 @@ export async function action({ request }: ActionFunctionArgs) {
     return json({ result: submission.reply() })
   }
 
+  if (noteId && formData.get('intent') === 'editNote') {
+    const existingNote = await prisma.note.findUnique({
+      select: { id: true },
+      where: { id: noteId, contactId },
+    })
+    invariantResponse(existingNote, `No note with the id "${noteId}" exists`, {
+      status: 404,
+    })
+
+    await prisma.note.update({
+      select: { id: true },
+      data: { text },
+      where: { id: noteId, contactId },
+    })
+
+    return redirect(`/contacts/${contactId}/notes`)
+  }
+
   invariantResponse(
     false,
     `Invalid intent: ${formData.get('intent') ?? 'Missing'}`,
   )
 }
 
-export function NoteEditor({ contactId }: { contactId: Contact['id'] }) {
+export function NoteEditor({
+  contactId,
+  note,
+}: {
+  contactId: Contact['id']
+  note?: Note
+}) {
+  const editMode = Boolean(note)
+
   const actionData = useActionData<typeof action>()
 
   // Used to optimistically submit the form
   const submit = useSubmit()
 
+  const navigation = useNavigation()
+  const updating = navigation.formData?.get('intent') === 'editNote'
+  const showUpdatingState = useSpinDelay(updating)
+
   const [form, fields] = useForm({
-    defaultValue: { contactId },
+    defaultValue: { contactId, ...note },
     constraint: getZodConstraint(schema),
     lastResult: actionData?.result,
     shouldValidate: 'onSubmit',
     shouldRevalidate: 'onInput',
     onValidate: ({ formData }) => parseWithZod(formData, { schema }),
     onSubmit: (event, context) => {
+      if (editMode) {
+        return
+      }
+
       event.preventDefault()
 
       const submission = parseWithZod(context.formData, { schema })
@@ -147,8 +189,15 @@ export function NoteEditor({ contactId }: { contactId: Contact['id'] }) {
 
   return (
     <Form method="post" action="/resources/note-editor" {...getFormProps(form)}>
-      <input type="hidden" name="intent" value="createNote" />
       <input {...getInputProps(fields.contactId, { type: 'hidden' })} />
+      {editMode ? (
+        <>
+          <input type="hidden" name="intent" value="editNote" />
+          <input {...getInputProps(fields.id, { type: 'hidden' })} />
+        </>
+      ) : (
+        <input type="hidden" name="intent" value="createNote" />
+      )}
       <div className="grid gap-1">
         <div className="overflow-hidden rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring">
           <Label id={fields.text.id} className="sr-only">
@@ -166,7 +215,7 @@ export function NoteEditor({ contactId }: { contactId: Contact['id'] }) {
               }
             }}
             className="min-h-12 resize-none scroll-py-3 border-0 p-3 shadow-none focus-visible:ring-0"
-            placeholder="Add a note…"
+            placeholder={editMode ? undefined : 'Add a note…'}
             aria-keyshortcuts={keyShortcut}
             {...getTextareaProps(fields.text, {
               ariaDescribedBy: `${fields.text.id}-description`,
@@ -175,11 +224,12 @@ export function NoteEditor({ contactId }: { contactId: Contact['id'] }) {
           <div className="flex items-center p-3 pt-0">
             <Button
               type="submit"
+              disabled={showUpdatingState}
               variant="secondary"
               size="sm"
               className="ml-auto"
             >
-              Save
+              {showUpdatingState ? 'Saving...' : 'Save'}
             </Button>
           </div>
         </div>

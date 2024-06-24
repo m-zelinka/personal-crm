@@ -6,7 +6,7 @@ import {
   type LoaderFunctionArgs,
   type SerializeFrom,
 } from '@remix-run/node'
-import { useFetcher, useFetchers, useLoaderData } from '@remix-run/react'
+import { Form, useFetcher, useFetchers, useLoaderData } from '@remix-run/react'
 import { compareDesc, format, isEqual, isThisYear } from 'date-fns'
 import { useSpinDelay } from 'spin-delay'
 import { Empty } from '~/components/empty'
@@ -217,9 +217,11 @@ function NoteItem({ note }: { note: Note }) {
             <p className="text-sm text-foreground">{note.text}</p>
           </div>
           <div className="flex items-center justify-end p-3 pt-0 opacity-0 focus-within:opacity-100 group-hover:opacity-100">
-            <Button variant="ghost" size="icon" aria-label="Edit">
-              <PencilIcon className="size-4" />
-            </Button>
+            <Form action={`${note.id}/edit`}>
+              <Button variant="ghost" size="icon" aria-label="Edit">
+                <PencilIcon className="size-4" />
+              </Button>
+            </Form>
             <deleteFetcher.Form method="POST">
               <input type="hidden" name="intent" value="deleteNote" />
               <input type="hidden" name="noteId" value={note.id} />
