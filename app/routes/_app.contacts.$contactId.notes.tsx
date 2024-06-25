@@ -1,6 +1,6 @@
 import { invariant, invariantResponse } from '@epic-web/invariant'
 import {
-  ClipboardDocumentCheckIcon,
+  CheckIcon,
   ClipboardIcon,
   CloudIcon,
   PencilIcon,
@@ -14,13 +14,13 @@ import {
 } from '@remix-run/node'
 import { Form, useFetcher, useFetchers, useLoaderData } from '@remix-run/react'
 import { compareDesc, format, isEqual, isThisYear } from 'date-fns'
-import { useEffect, useState } from 'react'
 import { useSpinDelay } from 'spin-delay'
 import { Empty } from '~/components/empty'
 import { GeneralErrorBoundary } from '~/components/error-boundary'
 import { Button } from '~/components/ui/button'
 import { requireUserId } from '~/utils/auth.server'
 import { prisma } from '~/utils/db.server'
+import { useClipboard } from '~/utils/use-clipboard'
 import { NoteEditor } from './resources.note-editor'
 
 type LoaderData = SerializeFrom<typeof loader>
@@ -247,39 +247,19 @@ function NoteItem({ note }: { note: Note }) {
 }
 
 function CopyNoteButton({ text }: { text: string }) {
-  const [{ state, i }, setState] = useState<{
-    state: 'idle' | 'copied'
-    i: number
-  }>({ state: 'idle', i: 0 })
-
-  async function handleClick() {
-    await navigator.clipboard.writeText(text)
-    setState({ state: 'copied', i: i + 1 })
-  }
-
-  useEffect(() => {
-    if (state === 'copied') {
-      const handle = window.setTimeout(() => {
-        setState({ state: 'idle', i: i + 1 })
-      }, 1500)
-
-      return function cleanup() {
-        window.clearTimeout(handle)
-      }
-    }
-  }, [state, i])
+  const { copy, hasCopied } = useClipboard(text)
 
   return (
-    <Button type="button" variant="ghost" size="icon" onClick={handleClick}>
-      {state === 'idle' ? (
+    <Button type="button" variant="ghost" size="icon" onClick={copy}>
+      {hasCopied ? (
         <>
-          <ClipboardIcon className="size-4" />
-          <span className="sr-only">Copy</span>
+          <CheckIcon className="size-4" />
+          <span className="sr-only">Copied</span>
         </>
       ) : (
         <>
-          <ClipboardDocumentCheckIcon className="size-4" />
-          <span className="sr-only">Copied</span>
+          <ClipboardIcon className="size-4" />
+          <span className="sr-only">Copy</span>
         </>
       )}
     </Button>
